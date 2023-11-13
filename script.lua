@@ -9,6 +9,7 @@ function _OnInit()
 			print('LuaEngine is Outdated. Things might not work properly.')
 		end
 		onPC = false
+		Now = 0x032BAE0 --Current Location
 		Save = 0x032BB30 --Save File
 		Sys3Pointer = 0x1C61AF8 --03system.bin Pointer Address
 	elseif GAME_ID == 0x431219CC and ENGINE_TYPE == 'BACKEND' then --PC
@@ -16,6 +17,7 @@ function _OnInit()
 			ConsolePrint('LuaBackend is Outdated. Things might not work properly.',2)
 		end
 		onPC = true
+		Now = 0x0714DB8 - 0x56454E
 		Save = 0x09A7070 - 0x56450E
 		Sys3Pointer = 0x2AE3550 - 0x56454E
 		PauseMenu = 0xBEBD28-0x56454E
