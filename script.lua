@@ -1,6 +1,12 @@
 hasRevertedGrowthText = false
 hasUpdatedGrowthText = false
 
+prevHJ = 0
+prevQR = 0
+prevDR = 0
+prevAD = 0
+prevG = 0
+
 function _OnInit()
 	print('Accurate Growth Levels v1.0.0')
 	GoAOffset = 0x7C
@@ -56,17 +62,28 @@ function _OnFrame()
 		end
 	else
 		-- In the field, fuck shit up
-		if not hasUpdatedGrowthText then
-			updateGrowthText(Save+0x25CE, 0x05E, Sys3+0x11754, 0x064C) -- High Jump
-			updateGrowthText(Save+0x25D0, 0x062, Sys3+0x117B4, 0x0654) -- Quick Run
-			updateGrowthText(Save+0x25D2, 0x234, Sys3+0x11814, 0x4E83) -- Dodge Roll
-			updateGrowthText(Save+0x25D4, 0x066, Sys3+0x11874, 0x065C) -- Aerial Dodge
-			updateGrowthText(Save+0x25D6, 0x06A, Sys3+0x118D4, 0x0664) -- Glide
-			hasRevertedGrowthText = false
-			hasUpdatedGrowthText = true
+		if hasAbilityChanged(prevHJ, Save+0x25CE) then
+			prevHJ = updateGrowthText(Save+0x25CE, 0x05E, Sys3+0x11754, 0x064C) -- High Jump
 		end
+		if hasAbilityChanged(prevQR, Save+0x25D0) then
+			prevQR = updateGrowthText(Save+0x25D0, 0x062, Sys3+0x117B4, 0x0654) -- Quick Run
+		end
+		if hasAbilityChanged(prevDR, Save+0x25D2) then
+			prevDR = updateGrowthText(Save+0x25D2, 0x234, Sys3+0x11814, 0x4E83) -- Dodge Roll
+		end
+		if hasAbilityChanged(prevAD, Save+0x25D4) then
+			prevAD = updateGrowthText(Save+0x25D4, 0x066, Sys3+0x11874, 0x065C) -- Aerial Dodge
+		end
+		if hasAbilityChanged(prevG, Save+0x25D6) then
+			prevG = updateGrowthText(Save+0x25D6, 0x06A, Sys3+0x118D4, 0x0664) -- Glide
+		end
+		hasRevertedGrowthText = false
 	end
-		
+end
+
+function hasAbilityChanged(prevAbility, slotNum)
+	slotAbility = ReadShort(slotNum) & 0x0FFF
+	return prevAbility ~= slotAbility
 end
 
 function revertGrowthText(slotNum, baseLevelAddress, baseLevelName)
@@ -114,4 +131,6 @@ function updateGrowthText(slotNum, baseAbilityAddress, baseLevelAddress, baseLev
 		WriteShort(lvl4+0x8, nextLevelName, onPC) -- Max
 		WriteShort(lvl4+0xA, nextLevelDescription, onPC) -- Max Description
 	end
+
+	return slotAbility
 end
