@@ -1,11 +1,11 @@
-hasRevertedGrowthText = false
-hasUpdatedGrowthText = false
+-- hasRevertedGrowthText = false
+-- hasUpdatedGrowthText = false
 
-prevHJ = 0
-prevQR = 0
-prevDR = 0
-prevAD = 0
-prevG = 0
+prevHJ = -1
+prevQR = -1
+prevDR = -1
+prevAD = -1
+prevG = -1
 
 function _OnInit()
 	print('Accurate Growth Levels v1.0.0')
@@ -28,7 +28,6 @@ function _OnInit()
 		Sys3Pointer = 0x2AE3550 - 0x56454E
 		PauseMenu = 0xBEBD28-0x56454E
 	end
-	havePrinted = false
 end
 
 function _OnFrame()
@@ -58,35 +57,25 @@ function _OnFrame()
 			revertGrowthText(Save+0x25D4, Sys3+0x11874, 0x065C) -- Aerial Dodge
 			revertGrowthText(Save+0x25D6, Sys3+0x118D4, 0x0664) -- Glide
 			hasRevertedGrowthText = true
-			hasUpdatedGrowthText = false
 		end
 	else
 		-- In the field, fuck shit up
-		if hasAbilityChanged(prevHJ, Save+0x25CE) then
-			prevHJ = updateGrowthText(Save+0x25CE, 0x05E, Sys3+0x11754, 0x064C) -- High Jump
-		end
-		if hasAbilityChanged(prevQR, Save+0x25D0) then
-			prevQR = updateGrowthText(Save+0x25D0, 0x062, Sys3+0x117B4, 0x0654) -- Quick Run
-		end
-		if hasAbilityChanged(prevDR, Save+0x25D2) then
-			prevDR = updateGrowthText(Save+0x25D2, 0x234, Sys3+0x11814, 0x4E83) -- Dodge Roll
-		end
-		if hasAbilityChanged(prevAD, Save+0x25D4) then
-			prevAD = updateGrowthText(Save+0x25D4, 0x066, Sys3+0x11874, 0x065C) -- Aerial Dodge
-		end
-		if hasAbilityChanged(prevG, Save+0x25D6) then
-			prevG = updateGrowthText(Save+0x25D6, 0x06A, Sys3+0x118D4, 0x0664) -- Glide
-		end
+		updateGrowthText(Save+0x25CE, 0x05E, Sys3+0x11754, 0x064C, prevHJ) -- High Jump
+		prevHJ = ReadShort(Save+0x25CE) & 0x0FFF
+		updateGrowthText(Save+0x25D0, 0x062, Sys3+0x117B4, 0x0654, prevQR) -- Quick Run
+		prevQR = ReadShort(Save+0x25D0) & 0x0FFF
+		updateGrowthText(Save+0x25D2, 0x234, Sys3+0x11814, 0x4E83, prevDR) -- Dodge Roll
+		prevDR = ReadShort(Save+0x25D2) & 0x0FFF
+		updateGrowthText(Save+0x25D4, 0x066, Sys3+0x11874, 0x065C, prevAD) -- Aerial Dodge
+		prevAD = ReadShort(Save+0x25D4) & 0x0FFF
+		updateGrowthText(Save+0x25D6, 0x06A, Sys3+0x118D4, 0x0664, prevG) -- Glide
+		prevG = ReadShort(Save+0x25D6) & 0x0FFF
 		hasRevertedGrowthText = false
 	end
 end
 
-function hasAbilityChanged(prevAbility, slotNum)
-	slotAbility = ReadShort(slotNum) & 0x0FFF
-	return prevAbility ~= slotAbility
-end
-
 function revertGrowthText(slotNum, baseLevelAddress, baseLevelName)
+	print('Reverting Growth Text to original')
 	lvl1 = baseLevelAddress
 	lvl2 = lvl1 + 0x18
 	lvl3 = lvl2 + 0x18
@@ -101,36 +90,37 @@ function revertGrowthText(slotNum, baseLevelAddress, baseLevelName)
 	WriteShort(lvl4+0xA, baseLevelName + 7, onPC) -- Max Description
 end
 
-function updateGrowthText(slotNum, baseAbilityAddress, baseLevelAddress, baseLevelName)
+function updateGrowthText(slotNum, baseAbilityAddress, baseLevelAddress, baseLevelName, prevAbility)
 	lvl1 = baseLevelAddress
 	lvl2 = lvl1 + 0x18
 	lvl3 = lvl2 + 0x18
 	lvl4 = lvl3 + 0x18
 	slotAbility = ReadShort(slotNum) & 0x0FFF
-	if slotAbility < baseAbilityAddress then
-		-- I don't have this growth at all, so set all growth text to Lvl 1
-		WriteShort(lvl1+0x8, baseLevelName, onPC) -- Lvl 1
-		WriteShort(lvl1+0xA, baseLevelName + 1, onPC) -- Lvl 1 Description
-		WriteShort(lvl2+0x8, baseLevelName, onPC) -- Lvl 2
-		WriteShort(lvl2+0xA, baseLevelName + 1, onPC) -- Lvl 2 Description
-		WriteShort(lvl3+0x8, baseLevelName, onPC) -- Lvl 3
-		WriteShort(lvl3+0xA, baseLevelName + 1, onPC) -- Lvl 3 Description
-		WriteShort(lvl4+0x8, baseLevelName, onPC) -- Max
-		WriteShort(lvl4+0xA, baseLevelName + 1, onPC) -- Max Description
-	elseif slotAbility < (baseAbilityAddress + 3) then
-		-- I have this growth in my inventory, set all growth text to next level
-		currentGrowthLevel = slotAbility - baseAbilityAddress + 1
-		nextLevelName = baseLevelName + (2 * currentGrowthLevel)
-		nextLevelDescription = baseLevelName + 1 + (2 * currentGrowthLevel)
-		WriteShort(lvl1+0x8, nextLevelName, onPC) -- Lvl 1
-		WriteShort(lvl1+0xA, nextLevelDescription, onPC) -- Lvl 1 Description
-		WriteShort(lvl2+0x8, nextLevelName, onPC) -- Lvl 2
-		WriteShort(lvl2+0xA, nextLevelDescription, onPC) -- Lvl 2 Description
-		WriteShort(lvl3+0x8, nextLevelName, onPC) -- Lvl 3
-		WriteShort(lvl3+0xA, nextLevelDescription, onPC) -- Lvl 3 Description
-		WriteShort(lvl4+0x8, nextLevelName, onPC) -- Max
-		WriteShort(lvl4+0xA, nextLevelDescription, onPC) -- Max Description
+	if prevAbility ~= slotAbility or hasRevertedGrowthText then
+		print('Just got a new ability or unpaused, updating custom text')
+		if slotAbility < baseAbilityAddress then
+			-- I don't have this growth at all, so set all growth text to Lvl 1
+			WriteShort(lvl1+0x8, baseLevelName, onPC) -- Lvl 1
+			WriteShort(lvl1+0xA, baseLevelName + 1, onPC) -- Lvl 1 Description
+			WriteShort(lvl2+0x8, baseLevelName, onPC) -- Lvl 2
+			WriteShort(lvl2+0xA, baseLevelName + 1, onPC) -- Lvl 2 Description
+			WriteShort(lvl3+0x8, baseLevelName, onPC) -- Lvl 3
+			WriteShort(lvl3+0xA, baseLevelName + 1, onPC) -- Lvl 3 Description
+			WriteShort(lvl4+0x8, baseLevelName, onPC) -- Max
+			WriteShort(lvl4+0xA, baseLevelName + 1, onPC) -- Max Description
+		elseif slotAbility < (baseAbilityAddress + 3) then
+			-- I have this growth in my inventory, set all growth text to next level
+			currentGrowthLevel = slotAbility - baseAbilityAddress + 1
+			nextLevelName = baseLevelName + (2 * currentGrowthLevel)
+			nextLevelDescription = baseLevelName + 1 + (2 * currentGrowthLevel)
+			WriteShort(lvl1+0x8, nextLevelName, onPC) -- Lvl 1
+			WriteShort(lvl1+0xA, nextLevelDescription, onPC) -- Lvl 1 Description
+			WriteShort(lvl2+0x8, nextLevelName, onPC) -- Lvl 2
+			WriteShort(lvl2+0xA, nextLevelDescription, onPC) -- Lvl 2 Description
+			WriteShort(lvl3+0x8, nextLevelName, onPC) -- Lvl 3
+			WriteShort(lvl3+0xA, nextLevelDescription, onPC) -- Lvl 3 Description
+			WriteShort(lvl4+0x8, nextLevelName, onPC) -- Max
+			WriteShort(lvl4+0xA, nextLevelDescription, onPC) -- Max Description
+		end
 	end
-
-	return slotAbility
 end
