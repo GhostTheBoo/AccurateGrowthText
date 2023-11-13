@@ -1,6 +1,6 @@
 title: Accurate Growth Text
 originalAuthor: GhostTheBoo
-description: A lua script that changes all text for Growth Levels in the field to the next level's text.
+description: A lua script that changes all text for Growth Levels in the field to that of the next level's text.
 assets:
 - name: scripts/script.lua
   package: kh2_first
