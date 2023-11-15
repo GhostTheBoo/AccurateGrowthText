@@ -6,4 +6,4 @@ assets:
   package: kh2_first
   method: copy
   source:
-  - name: script.lua
+  - name: AccurateGrowthText.lua
