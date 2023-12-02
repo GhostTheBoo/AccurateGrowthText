@@ -61,7 +61,9 @@ function _OnFrame()
 		end
 	else
 		-- In the field, fuck shit up
-		print('In the field, updating custom text')
+		if hasRevertedGrowthText then
+			print('In the field, updating custom text')
+		end
 		updateGrowthText(Save+0x25CE, 0x05E, Sys3+0x11754, 0x064C, prevHJ) -- High Jump
 		prevHJ = ReadShort(Save+0x25CE) & 0x0FFF
 		updateGrowthText(Save+0x25D0, 0x062, Sys3+0x117B4, 0x0654, prevQR) -- Quick Run
