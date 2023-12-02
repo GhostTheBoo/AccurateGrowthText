@@ -51,6 +51,7 @@ function _OnFrame()
 	if ReadByte(PauseMenu) == 3 then
 		-- In Pause Menu, put everything back to normal
 		if not hasRevertedGrowthText then
+			print('Reverting Growth Text to original')
 			revertGrowthText(Save+0x25CE, Sys3+0x11754, 0x064C) -- High Jump
 			revertGrowthText(Save+0x25D0, Sys3+0x117B4, 0x0654) -- Quick Run
 			revertGrowthText(Save+0x25D2, Sys3+0x11814, 0x4E83) -- Dodge Roll
@@ -60,6 +61,7 @@ function _OnFrame()
 		end
 	else
 		-- In the field, fuck shit up
+		print('In the field, updating custom text')
 		updateGrowthText(Save+0x25CE, 0x05E, Sys3+0x11754, 0x064C, prevHJ) -- High Jump
 		prevHJ = ReadShort(Save+0x25CE) & 0x0FFF
 		updateGrowthText(Save+0x25D0, 0x062, Sys3+0x117B4, 0x0654, prevQR) -- Quick Run
@@ -75,7 +77,6 @@ function _OnFrame()
 end
 
 function revertGrowthText(slotNum, baseLevelAddress, baseLevelName)
-	print('Reverting Growth Text to original')
 	lvl1 = baseLevelAddress
 	lvl2 = lvl1 + 0x18
 	lvl3 = lvl2 + 0x18
@@ -97,7 +98,6 @@ function updateGrowthText(slotNum, baseAbilityAddress, baseLevelAddress, baseLev
 	lvl4 = lvl3 + 0x18
 	slotAbility = ReadShort(slotNum) & 0x0FFF
 	if prevAbility ~= slotAbility or hasRevertedGrowthText then
-		print('Just got a new ability or unpaused, updating custom text')
 		if slotAbility < baseAbilityAddress then
 			-- I don't have this growth at all, so set all growth text to Lvl 1
 			WriteShort(lvl1+0x8, baseLevelName, onPC) -- Lvl 1
