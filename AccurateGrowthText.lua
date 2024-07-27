@@ -83,7 +83,7 @@ function _OnFrame()
 		return
 	end
 	
-	if ReadByte(PauseMenu) == 3 then
+	if ReadByte(PauseMenu) == 0x0A then
 		-- In Pause Menu, put everything back to normal
 		if not hasRevertedGrowthText then
 			revertGrowthText(highJump)
